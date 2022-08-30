@@ -13,7 +13,8 @@ class ExpandableText extends StatefulWidget {
   const ExpandableText(
     this.text, {
     Key? key,
-    required this.expandText,
+    this.expandText,
+    this.expandWidget,
     this.collapseText,
     this.expanded = false,
     this.onExpandedChanged,
@@ -41,11 +42,13 @@ class ExpandableText extends StatefulWidget {
     this.animationDuration,
     this.animationCurve,
     this.semanticsLabel,
-  })  : assert(maxLines > 0),
+    this.iconSize = 16,
+  })  : assert(maxLines > 0 && (expandText != null || expandWidget != null)),
         super(key: key);
 
   final String text;
-  final String expandText;
+  final String? expandText;
+  final Widget? expandWidget;
   final String? collapseText;
   final bool expanded;
   final ValueChanged<bool>? onExpandedChanged;
@@ -73,6 +76,7 @@ class ExpandableText extends StatefulWidget {
   final Duration? animationDuration;
   final Curve? animationCurve;
   final String? semanticsLabel;
+  final double iconSize;
 
   @override
   ExpandableTextState createState() => ExpandableTextState();
@@ -144,8 +148,7 @@ class ExpandableTextState extends State<ExpandableText>
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
     }
 
-    final linkText =
-        (_expanded ? widget.collapseText : widget.expandText) ?? '';
+    final linkText = (_expanded ? widget.collapseText : widget.expandText);
     final linkColor = widget.linkColor ??
         widget.linkStyle?.color ??
         Theme.of(context).colorScheme.secondary;
@@ -158,29 +161,42 @@ class ExpandableTextState extends State<ExpandableText>
             : '';
 
     final link = TextSpan(
-      children: [
-        if (!_expanded)
-          TextSpan(
-            text: '\u2026 ',
-            style: widget.linkEllipsis ? linkTextStyle : effectiveTextStyle,
-            recognizer: widget.linkEllipsis ? _linkTapGestureRecognizer : null,
-          ),
-        if (linkText.length > 0)
-          TextSpan(
-            style: effectiveTextStyle,
-            children: <TextSpan>[
-              if (_expanded)
+      children: linkText != null
+          ? [
+              if (!_expanded)
                 TextSpan(
-                  text: ' ',
+                  text: '\u2026 ',
+                  style:
+                      widget.linkEllipsis ? linkTextStyle : effectiveTextStyle,
+                  recognizer:
+                      widget.linkEllipsis ? _linkTapGestureRecognizer : null,
                 ),
-              TextSpan(
-                text: linkText,
-                style: linkTextStyle,
-                recognizer: _linkTapGestureRecognizer,
+              if (linkText.length > 0)
+                TextSpan(
+                  style: effectiveTextStyle,
+                  children: [
+                    if (_expanded)
+                      TextSpan(
+                        text: ' ',
+                      ),
+                    TextSpan(
+                      text: linkText,
+                      style: linkTextStyle,
+                      recognizer: _linkTapGestureRecognizer,
+                    ),
+                  ],
+                ),
+            ]
+          : [
+              WidgetSpan(
+                child: GestureDetector(
+                  onTap: () {
+                    _linkTapped();
+                  },
+                  child: widget.expandWidget!,
+                ),
               ),
             ],
-          ),
-      ],
     );
 
     final prefix = TextSpan(
@@ -212,6 +228,10 @@ class ExpandableTextState extends State<ExpandableText>
             widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
         final locale = Localizations.maybeLocaleOf(context);
 
+        TextSpan textSpan;
+
+        TextSpan? text;
+        Size? linkSize;
         TextPainter textPainter = TextPainter(
           text: link,
           textAlign: textAlign,
@@ -220,17 +240,22 @@ class ExpandableTextState extends State<ExpandableText>
           maxLines: widget.maxLines,
           locale: locale,
         );
-        textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
-        final linkSize = textPainter.size;
+
+        if (widget.expandText != null) {
+          textPainter.text = link;
+
+          textPainter.layout(
+              minWidth: constraints.minWidth, maxWidth: maxWidth);
+          linkSize = textPainter.size;
+        }
 
         textPainter.text = content;
         textPainter.layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
         final textSize = textPainter.size;
 
-        TextSpan textSpan;
         if (textPainter.didExceedMaxLines) {
           final position = textPainter.getPositionForOffset(Offset(
-            textSize.width - linkSize.width,
+            textSize.width - (linkSize?.width ?? widget.iconSize),
             textSize.height,
           ));
           final endOffset =
@@ -242,7 +267,7 @@ class ExpandableTextState extends State<ExpandableText>
                   ? _linkTapGestureRecognizer
                   : null;
 
-          final text = _textSegments.isNotEmpty
+          text = _textSegments.isNotEmpty
               ? TextSpan(
                   children: _buildTextSpans(
                       _expanded
@@ -261,7 +286,7 @@ class ExpandableTextState extends State<ExpandableText>
 
           textSpan = TextSpan(
             style: effectiveTextStyle,
-            children: <TextSpan>[
+            children: [
               prefix,
               text,
               link,
