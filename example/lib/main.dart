@@ -30,21 +30,36 @@ class MyHomePage extends StatelessWidget {
           children: <Widget>[
             ExpandableText(
               'Short text',
-              expandText: 'show more',
-              collapseText: 'show less',
+              expandText: '더보기',
+              collapseText: '접기',
             ),
             SizedBox(height: 10.0),
             ExpandableText(
               'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
-              // expandText: 'show more',
-              expandWidget: Icon(
-                Icons.ac_unit_outlined,
-                color: Colors.red,
-                size: 29,
-              ),
+              expandText: '더보기',
+              // expandWidget: Icon(
+              //   Icons.ac_unit_outlined,
+              //   color: Colors.red,
+              //   size: 29,
+              // ),
+
+              linkEllipsis: false,
+              collapseText: '접기',
               iconSize: 29,
-              maxLines: 1,
-              linkColor: Colors.blue,
+              maxLines: 3,
+              linkColor: Color(0xFFACB6BF),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                overflow: TextOverflow.fade,
+              ),
+              urlStyle: TextStyle(
+                fontSize: 16,
+                color: Colors.black,
+                overflow: TextOverflow.fade,
+              ),
+
+              textAlign: TextAlign.center,
             ),
           ],
         ),

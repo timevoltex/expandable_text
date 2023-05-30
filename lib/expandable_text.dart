@@ -163,7 +163,7 @@ class ExpandableTextState extends State<ExpandableText>
     final link = TextSpan(
       children: linkText != null
           ? [
-              if (!_expanded)
+              if (!_expanded && widget.linkEllipsis)
                 TextSpan(
                   text: '\u2026 ',
                   style:
@@ -175,10 +175,9 @@ class ExpandableTextState extends State<ExpandableText>
                 TextSpan(
                   style: effectiveTextStyle,
                   children: [
-                    if (_expanded)
-                      TextSpan(
-                        text: ' ',
-                      ),
+                    TextSpan(
+                      text: ' ',
+                    ),
                     TextSpan(
                       text: linkText,
                       style: linkTextStyle,
@@ -302,7 +301,7 @@ class ExpandableTextState extends State<ExpandableText>
           textDirection: textDirection,
           textAlign: textAlign,
           textScaleFactor: textScaleFactor,
-          overflow: TextOverflow.clip,
+          overflow: TextOverflow.fade,
         );
 
         if (widget.animation) {
